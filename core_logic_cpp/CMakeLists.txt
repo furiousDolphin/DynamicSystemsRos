@@ -5,22 +5,54 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
-find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # comment the line when a copyright and license is added to all source files
-  set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # comment the line when this package is in a git repo and when
-  # a copyright and license is added to all source files
-  set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
+find_package(ament_cmake REQUIRED)
+find_package(pybind11_vendor REQUIRED)
+find_package(pybind11 REQUIRED)
+find_package(SDL2 REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(Boost REQUIRED)
+
+
+pybind11_add_module(module_uno modules/module_uno.cpp)
+
+target_include_directories(module_uno PUBLIC
+    ${PROJECT_SOURCE_DIR}/include
+    ${SDL2_INCLUDE_DIRS}
+    ${EIGEN3_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+)
+
+target_link_libraries(module_uno PUBLIC 
+    ${SDL2_LIBRARIES}
+    ${Boost_LIBRARIES}
+    Eigen3::Eigen 
+)
+
+install(TARGETS module_uno
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+
+#jakbym chcial zrobic apke na boku
+# add_executable(DynamicSystemsApp main.cpp)
+
+# target_include_directories(DynamicSystemsApp PUBLIC
+#     ${PROJECT_SOURCE_DIR}/include
+#     ${SDL2_INCLUDE_DIRS}
+#     ${EIGEN3_INCLUDE_DIRS}
+#     ${Boost_INCLUDE_DIRS}
+# )
+
+# target_link_libraries(DynamicSystemsApp PUBLIC 
+#     ${SDL2_LIBRARIES}
+#     ${Boost_LIBRARIES}
+#     Eigen3::Eigen 
+# )
+
+
+# install(TARGETS DynamicSystemsApp
+#   DESTINATION lib/${PROJECT_NAME}
+# )
 
 ament_package()
