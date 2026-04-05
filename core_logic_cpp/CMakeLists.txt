@@ -30,9 +30,13 @@ target_link_libraries(module_uno PUBLIC
 )
 
 install(TARGETS module_uno
-  DESTINATION lib/${PROJECT_NAME}
+  DESTINATION lib/python3.10/site-packages
 )
 
+install(DIRECTORY scripts/
+  DESTINATION lib/python3.10/site-packages
+  FILES_MATCHING PATTERN "*.py"
+)
 
 #jakbym chcial zrobic apke na boku
 # add_executable(DynamicSystemsApp main.cpp)
