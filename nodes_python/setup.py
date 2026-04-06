@@ -24,6 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            "PID_node = nodes_python.PID_script:main",
+            "System_node = nodes_python.System_script:main"
         ],
     },
 )
