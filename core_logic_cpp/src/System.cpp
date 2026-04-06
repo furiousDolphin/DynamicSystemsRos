@@ -11,7 +11,7 @@ System::System(
     Eigen::VectorXd b_coeffs, 
     Eigen::VectorXd a_coeffs
 ) : 
-    tf_{b_coeffs, a_coeffs},
+    tf_{b_coeffs, a_coeffs, Eigen::MatrixXd{}},
     t_{0.0},
     dt_{0.0002}
 {
@@ -39,18 +39,21 @@ void System::update()
 std::array<Eigen::VectorXd, 2> System::step_impulse_helper(double total_time, int n, ResponseType response_type)
 {
     this->update();
-    double a_0 = tf_.a_coeffs[0];
     int eq_order = tf_.a_coeffs.size()-1;
+    double a_0 = tf_.a_coeffs[0];
+    double b_0 = tf_.b_coeffs[0];
+    double a_end = tf_.a_coeffs[eq_order];
     state_ = Eigen::VectorXd::Zero(eq_order);
 
     switch (response_type)
     {
         case ResponseType::IMPULSE:
-            forcing_func_.func = [](double t){return 0.0;};
-            state_[eq_order-1] = 1/a_0;
+            forcing_func_.func = [](double /*t*/){return 0.0;};
+            //state_[eq_order-1] = 1.0/a_0;
+            state_[eq_order-1] = b_0/a_end;
             break;
         case ResponseType::STEP:
-            forcing_func_.func = [](double t){return 1.0;};
+            forcing_func_.func = [](double /*t*/){return 1.0;};
             break;       
     }
 
@@ -126,7 +129,7 @@ void System::set_forcing_func(FuncType func)
 {
     std::visit(overloaded{
         [&](std::function<double(void)> void_func)
-        {forcing_func_.func = [void_func](double t){return void_func();};},
+        {forcing_func_.func = [void_func](double /*t*/){return void_func();};},
         [&](std::function<double(double)> double_func)
         {forcing_func_.func = double_func;}
     }, func);
@@ -147,7 +150,7 @@ void System::set_forcing_func(FuncType func)
                 double L = 0.001;
                 std::pair<double, double> cheb_range{0.0, L};
                 Eigen::VectorXd cheb_nodes = ChebNodes(N, cheb_range.first, cheb_range.second);
-                Eigen::VectorXd cheb_vals = cheb_nodes.unaryExpr([&](double t){return void_func();});
+                Eigen::VectorXd cheb_vals = cheb_nodes.unaryExpr([&](double /*t*/){return void_func();});
                 Eigen::VectorXd cheb_coeffs = ChebCoeffs(cheb_vals);
                 Eigen::MatrixXd D = DifferentiationOperator(N); 
                 Eigen::VectorXd kth_deriv_coeffs = cheb_coeffs;

@@ -42,7 +42,8 @@ t: float = 0.0
 n: int = 500
 (w_dense, mag_dense, phase_dense) = system.bode_data(-2, 2, n)
 (w_dense, Re_dense, Im_dense) = system.nyquist_data(-2, 2, n)
-(t_dense, y_dense) = system.step_response(10, n)
+(step_t_dense, step_y_dense) = system.step_response(10, n)
+(impulse_t_dense, impulse_y_dense) = system.impulse_response(10, n)
 
 subplot1: Subplot = Subplot()
 subplot1.add(w_dense, mag_dense, x_scale="log", y_scale="linear")
@@ -54,7 +55,8 @@ subplot3: Subplot = Subplot(equal_aspect=True)
 subplot3.add(Re_dense, Im_dense, x_scale="linear", y_scale="linear")
 
 subplot4: Subplot = Subplot()
-subplot4.add(t_dense, y_dense, x_scale="linear", y_scale="linear")
+subplot4.add(step_t_dense, step_y_dense, x_scale="linear", y_scale="linear")
+subplot4.add(impulse_t_dense, impulse_y_dense, x_scale="linear", y_scale="linear")
 
 subplots: SubplotManager = SubplotManager((960, 540))
 subplots.add(subplot1)
