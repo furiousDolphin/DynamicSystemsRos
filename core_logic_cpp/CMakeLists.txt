@@ -41,7 +41,7 @@ install(TARGETS module_uno
   DESTINATION lib/python3.10/site-packages
 )
 
-install(DIRECTORY scripts/
+install(DIRECTORY scripts
   DESTINATION lib/python3.10/site-packages
   FILES_MATCHING PATTERN "*.py"
 )
