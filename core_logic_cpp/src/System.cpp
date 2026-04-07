@@ -227,7 +227,9 @@ void System::operator()(const Eigen::VectorXd& Z, Eigen::VectorXd& dZdt, double 
     double a_n = tf_.a_coeffs[n];
     double x = forcing_func_(t);
 
-    dZdt = tf_.M*Z;
+    dZdt.head(n-1) = Z.tail(n-1);
+    dZdt[n-1] = tf_.M.row(n-1) * Z;
+
     dZdt[n-1] += x/a_n;
 }
 
