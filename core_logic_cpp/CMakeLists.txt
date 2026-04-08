@@ -22,7 +22,8 @@ pybind11_add_module(module_uno
     modules/module_uno.cpp 
     src/System.cpp
     src/ChebFunc.cpp
-    src/ValueManager.cpp)
+    src/ValueManager.cpp
+    src/PID.cpp)
 
 target_include_directories(module_uno PUBLIC
     ${PROJECT_SOURCE_DIR}/include
