@@ -1,0 +1,47 @@
+
+
+#ifndef APP_HPP_
+#define APP_HPP_
+
+#include <SDL.h>
+#include <SDL_mixer.h>
+#include <SDL_ttf.h>
+#include <SDL_image.h>
+
+#include <unordered_map>
+#include <memory>
+
+#include "Settings.hpp"
+#include "EventManager.hpp"
+#include "GraphicsManager.hpp"
+#include "SDL_Management.hpp"
+#include "Mode.hpp"
+#include "PersistentState.hpp"
+#include "ValueManager.hpp"
+
+
+class App
+{
+    public:
+        App(OscilloscopeInputs& oscilloscope_inputs, const std::string& base_path);
+        ~App();
+        
+        void run();
+        bool run_once();
+        bool init();
+
+    private:
+        SDL_Window* window_;
+        SDL_Renderer* renderer_;
+        EventManager event_manager_;
+        GraphicsManager graphics_manager_;
+        PersistentState persistent_state_;
+
+        Uint32 last_time_;
+        Uint32 current_time_;
+        float delta_time_;
+
+        std::unordered_map< ModeType, std::unique_ptr<Mode> > modes_map_;
+};
+
+#endif

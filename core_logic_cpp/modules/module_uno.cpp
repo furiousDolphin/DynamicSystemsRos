@@ -6,6 +6,7 @@
 
 #include "System.hpp"
 #include "ValueManager.hpp"
+#include "PID.hpp"
 
 namespace py = pybind11;
 
@@ -77,6 +78,74 @@ PYBIND11_MODULE(module_uno, m)
           .def("check_and_reset_dirty",
                &ValueManager::check_and_reset_dirty,
                "")
-          .def_readwrite("getter", &ValueManager::getter)
-          .def_readwrite("setter", &ValueManager::setter);
+          .def_property("getter", 
+               [](ValueManager &self) {
+                    return std::function<double()>(std::bind(&ValueManager::get_val, &self));
+               },
+               [](ValueManager &self, std::function<double()> f) {
+                    self.getter = f; 
+               }
+          )
+          .def_property("setter", 
+               [](ValueManager &self) {
+                    return std::function<void(double)>(std::bind(&ValueManager::set_val, &self, std::placeholders::_1));
+               },
+               [](ValueManager &self, std::function<void(double)> f) {
+                    self.setter = f;
+               }
+          )
+          .def("link_to",
+               &ValueManager::link_to,
+               "",
+               py::arg("other"));
+
+     py::class_<PID>(m, "PID")
+          .def(py::init<>())
+          .def("do_step",
+               &PID::do_step,
+               "",
+               py::arg("cur_e"))
+          .def("update_params",
+               &PID::update_params,
+               "",
+               py::arg("Kf"),
+               py::arg("Tf"),
+               py::arg("Kp"),
+               py::arg("Ki"),
+               py::arg("Kd"))
+          .def("update_Tp",
+               &PID::update_Tp,
+               "",
+               py::arg("Tp"));
+
+     py::enum_<SliderType>(m, "SliderConfig")
+          .value("HORIZONTAL_SIMPLE", SliderType::HORIZONTAL_SIMPLE)
+          .value("VERTICAL_SIMPLE", SliderType::VERTICAL_SIMPLE);
+
+     py::class_<Vector2D<int>>(m, "Vector2D")
+          .def(py::init<int, int>())
+          .def_readwrite("x", &Vector2D<int>::x)
+          .def_readwrite("y", &Vector2D<int>::y);
+
+     py::class_<SliderConfig>(m, "SliderConfig")
+          .def_readonly("name", &SliderConfig::name)
+          .def_readonly("type", &SliderConfig::type)
+          .def_readonly("min_val", &SliderConfig::min_val)
+          .def_readonly("max_val", &SliderConfig::max_val)
+          .def_readonly("init_val", &SliderConfig::init_val)
+          .def_readonly("start_pos", &SliderConfig::start_pos);
+
+     py::class_<App>(m, "App")
+          .def(py::init<OscilloscopeInputs&, std::string>(), 
+               py::arg("oscilloscope_inputs"),
+               py::arg("base_path"))
+          .def("run",
+               &App::run,
+               "")
+          .def("run_once",
+               &App::run_once,
+               "")
+          .def("init",
+               &App::init,
+               "");
 }

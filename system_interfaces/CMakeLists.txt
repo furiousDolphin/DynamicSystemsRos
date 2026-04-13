@@ -15,6 +15,10 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/SimpleFloat.msg"
+  "msg/PID_params.msg"
+  "msg/PID_out.msg"
+  "msg/SetpointProvider_out.msg"
+  "msg/System_out.msg"
 )
 
 if(BUILD_TESTING)

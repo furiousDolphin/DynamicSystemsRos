@@ -16,6 +16,7 @@
 #include <initializer_list>
 #include <cmath>
 #include <algorithm>
+#include <unordered_map>
 
 #include "Texture.hpp"
 #include "Vector2D.hpp"
@@ -24,6 +25,22 @@
 #include "GraphicsManager.hpp"
 
 
+
+enum class SliderType
+{
+    HORIZONTAL_SIMPLE,
+    VERTICAL_SIMPLE
+};
+
+struct SliderConfig
+{
+    std::string name;
+    SliderType type;
+    double min_val;
+    double max_val;
+    double init_val;
+    Vector2D<int> start_pos;
+};
 
 class Sliders;
 
@@ -106,7 +123,12 @@ class Sliders
             const EventManager& event_manager, 
             const GraphicsManager& graphics_manager);
 
-        void add(std::unique_ptr<Slider> slider_ptr);
+        //void add(std::unique_ptr<Slider> slider_ptr);
+        //void add(SliderConfig slider_config);
+
+        void add(const std::vector<SliderConfig>& configs);
+        void add(const SliderConfig& cfg);
+
         void init();
         void update();
         void render() const;
@@ -133,10 +155,11 @@ class Sliders
                 Rect* rect_ptr_;
                 bool active_;
                 Vector2D<int> offset_;
-        };
+        } grabbed_;
 
-        GrabbedState grabbed_;
         std::list<std::unique_ptr<Slider>> sliders_;
+
+        std::unordered_map<std::string, ValueManager> dict_;
 
         
 };
