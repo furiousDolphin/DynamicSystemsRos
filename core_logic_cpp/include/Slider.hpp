@@ -23,6 +23,7 @@
 #include "Rect.hpp"
 #include "EventManager.hpp"
 #include "GraphicsManager.hpp"
+#include "ValueManager.hpp"
 
 
 
@@ -68,7 +69,8 @@ class Slider
         class SlideRect : public Rect
         {
             public:
-                enum Axis;
+                enum Axis
+                { HORIZONTAL, VERTICAL };
                 SlideRect(
                     Vector2D<int> center, 
                     Vector2D<int> shape, 
@@ -79,9 +81,6 @@ class Slider
                     void set_pos(const Vector2D<int>& new_top_left) override;
                     Vector2D<int> get_pos() const override; 
                     bool collide_point(const Vector2D<int>& v) const override;
-
-                enum Axis
-                { HORIZONTAL, VERTICAL };
 
             private:
                 Axis axis_;

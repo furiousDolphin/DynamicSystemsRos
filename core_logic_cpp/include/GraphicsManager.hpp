@@ -40,10 +40,7 @@ class GraphicsManager
         {
             SLIDER_MARKED_BUTTON,
             SLIDER_UNMARKED_BUTTON,
-            SLIDER_PLATFORM,
-            ATAT_LEG_SEGMENT_1,
-            ATAT_LEG_SEGMENT_2,
-            ATAT_LEG_SEGMENT_3
+            SLIDER_PLATFORM
         };
 
         enum AnimationKey
@@ -106,11 +103,7 @@ class GraphicsManager
         {
             {"data/graphics/slider/marked.png", SLIDER_MARKED_BUTTON},
             {"data/graphics/slider/unmarked.png", SLIDER_UNMARKED_BUTTON},
-            {"data/graphics/slider/platform.png", SLIDER_PLATFORM},
-            {"data/graphics/ATAT/leg.png", ATAT_LEG_SEGMENT_1},
-            {"data/graphics/ATAT/leg.png", ATAT_LEG_SEGMENT_2},
-            {"data/graphics/ATAT/leg.png", ATAT_LEG_SEGMENT_3}
-
+            {"data/graphics/slider/platform.png", SLIDER_PLATFORM}
         };  
 
         inline static std::unordered_map<std::string, AnimationKey> animations_as_path_key_map

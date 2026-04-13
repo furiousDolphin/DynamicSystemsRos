@@ -121,11 +121,11 @@ void Sliders::add(const std::vector<SliderConfig>& configs)
     { this->add(cfg); }
 }
 
-Sliders::void add(const SliderConfig& cfg);
+void Sliders::add(const SliderConfig& cfg)
 {
     std::string key = cfg.name;
     dict_[key] = ValueManager{cfg.init_val};
-    auto update_func = [this, key](double new_val){dict_[key].set_val(new_val);}
+    auto update_func = [this, key](double new_val){dict_[key].set_val(new_val);};
     
     std::unique_ptr<Slider> new_slider;
 
@@ -144,7 +144,7 @@ Sliders::void add(const SliderConfig& cfg);
     }
 
     if ( new_slider )
-    { sliders_.push_back(std::move(new_slider)) }   
+    { sliders_.push_back(std::move(new_slider)); }   
 }
 
 Sliders::Sliders(

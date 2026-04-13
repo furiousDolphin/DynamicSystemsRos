@@ -10,7 +10,7 @@
 class PID
 {
     public:
-        PID();
+        PID(double out_min, double out_max);
         double do_step(double cur_e);
         void update_params(double Kf, double Tf, double Kp, double Ki, double Kd);
         void update_Tp(double Tp);
@@ -28,7 +28,7 @@ class PID
 
             bool dirty;
 
-            bool check_and_reset_dirty()
+            bool check_and_reset_dirty();
         } params_;
 
         double P_;
@@ -41,6 +41,11 @@ class PID
 
         double prev_e_;
         double prev_D_;
+
+        
+        double out_min_;
+        double out_max_;
+         
 };
 
 #endif

@@ -15,7 +15,6 @@
 #include "GraphicsManager.hpp"
 #include "PersistentState.hpp"
 #include "ValueManager.hpp"
-#include "AT_AT.hpp"
 
 
 
@@ -29,7 +28,6 @@ class GameMode : public Mode
             EventManager& event_manager, 
             GraphicsManager& graphics_manager, 
             PersistentState& persistent_state,
-            OscilloscopeInputs& oscilloscope_inputs, 
             const std::string& base_path,
             float& dt );
 
@@ -51,13 +49,11 @@ class GameMode : public Mode
             EventManager& event_manager;
             GraphicsManager& graphics_manager;
             PersistentState& persistent_state;
-            OscilloscopeInputs& oscilloscope_inputs;
             float& dt;
         } context_;
 
         Buttons buttons_;
         Sliders sliders_;
-        AT_AT at_at_;
     };
 
 #endif

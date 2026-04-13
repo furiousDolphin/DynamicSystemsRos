@@ -15,6 +15,7 @@ from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
 from system_interfaces.msg import SimpleFloat
+import numpy as np
 
 #-------------------------------------------------
 
@@ -28,15 +29,19 @@ class SetpointProviderNode(Node):
             SimpleFloat, "/SetpointProvider_node_out", 10
         )
 
-        self.timer: rclpy.Timer = self.create_timer(0.1, self.data_callback)
-
+        self.f = lambda t: 1.0 if np.sin(t) > 0 else 0.0
+        self.start_t = self.get_clock().now().nanoseconds/1e9
+        self.timer: rclpy.timer.Timer = self.create_timer(0.1, self.data_callback)
+        
         #-----------------------------------------------------
 
         self.get_logger().info("inicjalizacja SetpointProvider_node")
 
     def data_callback(self)->None:
         out_data: SimpleFloat = SimpleFloat()
-        out_data.data = 1.0
+        cur_t = self.get_clock().now().nanoseconds/1e9
+        t = cur_t - self.start_t
+        out_data.data = float(self.f(t))
         self.data_publisher.publish(out_data)
         self.get_logger().info(f"r: {out_data.data:5.2f}")
 

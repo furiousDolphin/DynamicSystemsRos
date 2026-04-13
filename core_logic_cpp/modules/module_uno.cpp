@@ -7,6 +7,8 @@
 #include "System.hpp"
 #include "ValueManager.hpp"
 #include "PID.hpp"
+#include "Slider.hpp" 
+#include "App.hpp"
 
 namespace py = pybind11;
 
@@ -100,7 +102,7 @@ PYBIND11_MODULE(module_uno, m)
                py::arg("other"));
 
      py::class_<PID>(m, "PID")
-          .def(py::init<>())
+          .def(py::init<double, double>())
           .def("do_step",
                &PID::do_step,
                "",
@@ -118,7 +120,7 @@ PYBIND11_MODULE(module_uno, m)
                "",
                py::arg("Tp"));
 
-     py::enum_<SliderType>(m, "SliderConfig")
+     py::enum_<SliderType>(m, "SliderType")
           .value("HORIZONTAL_SIMPLE", SliderType::HORIZONTAL_SIMPLE)
           .value("VERTICAL_SIMPLE", SliderType::VERTICAL_SIMPLE);
 
@@ -136,8 +138,7 @@ PYBIND11_MODULE(module_uno, m)
           .def_readonly("start_pos", &SliderConfig::start_pos);
 
      py::class_<App>(m, "App")
-          .def(py::init<OscilloscopeInputs&, std::string>(), 
-               py::arg("oscilloscope_inputs"),
+          .def(py::init<const std::string&>(), 
                py::arg("base_path"))
           .def("run",
                &App::run,

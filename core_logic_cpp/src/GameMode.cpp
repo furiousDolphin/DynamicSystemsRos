@@ -13,26 +13,17 @@ GameMode::GameMode(
     EventManager& event_manager, 
     GraphicsManager& graphics_manager, 
     PersistentState& persistent_state,
-    OscilloscopeInputs& oscilloscope_inputs,
     const std::string& base_path, 
     float& dt 
 ) :
-    context_{renderer, event_manager, graphics_manager, persistent_state, oscilloscope_inputs, dt},
+    context_{renderer, event_manager, graphics_manager, persistent_state, dt},
     buttons_{event_manager, graphics_manager},
-    sliders_{event_manager, graphics_manager},
-    at_at_{graphics_manager, dt, base_path}
+    sliders_{event_manager, graphics_manager}
 {
     this->create_buttons();
     this->create_sliders();
 
     sliders_.init();
-    at_at_.init();
-
-    auto& [os_u, os_y] = context_.oscilloscope_inputs;
-    auto& [at_u, at_y] = at_at_.get_speed_inputs();
-
-    os_y.link_to(at_y);
-    os_u.link_to(at_u);
 }
 
 void GameMode::create_buttons()
@@ -45,47 +36,47 @@ void GameMode::create_buttons()
 
 void GameMode::create_sliders()
 {
-    int w = 100;
-    int margin = 20;
+    // int w = 100;
+    // int margin = 20;
 
-    auto& [os_u, os_y] = context_.oscilloscope_inputs;
-    auto& [at_u, at_y] = at_at_.get_speed_inputs();
-    auto& [zeta, r, f] = at_at_.get_sys_inputs();
-    const auto& graphics_manager = context_.graphics_manager;
+    // auto& [os_u, os_y] = context_.oscilloscope_inputs;
+    // auto& [at_u, at_y] = at_at_.get_speed_inputs();
+    // auto& [zeta, r, f] = at_at_.get_sys_inputs();
+    // const auto& graphics_manager = context_.graphics_manager;
 
-    //-----------------------------------------   z tego trzeba zrobic json'a aby latwo testowac
+    // //-----------------------------------------   z tego trzeba zrobic json'a aby latwo testowac
 
-    struct Range
-    {
-        double min_v;
-        double max_v;
-        double init_v;
-    };
+    // struct Range
+    // {
+    //     double min_v;
+    //     double max_v;
+    //     double init_v;
+    // };
 
-    Range f_r{0.1, 5.0, 1.0};
-    Range r_r{0.1, 2.0, 0.8};
-    Range zeta_r{0.1, 2.0, 0.8};
-    Range speed_u_r{-30.0, 30.0, 0.0};
+    // Range f_r{0.1, 5.0, 1.0};
+    // Range r_r{0.1, 2.0, 0.8};
+    // Range zeta_r{0.1, 2.0, 0.8};
+    // Range speed_u_r{-30.0, 30.0, 0.0};
 
-    //-----------------------------------------
+    // //-----------------------------------------
 
-    sliders_.add(std::make_unique<Slider>(
-        Vector2D<int>{WIDTH-1*w-1*margin, margin}, 
-        graphics_manager, speed_u_r.min_v, speed_u_r.max_v, speed_u_r.init_v, 
-        [this, &os_u, &at_u](double val)
-        { at_u.set_val(val);}));
-    sliders_.add(std::make_unique<Slider>(
-        Vector2D<int>{WIDTH-2*w-2*margin, margin}, 
-        graphics_manager, zeta_r.min_v, zeta_r.max_v, zeta_r.init_v, 
-        zeta.setter));
-    sliders_.add(std::make_unique<Slider>(
-        Vector2D<int>{WIDTH-3*w-3*margin, margin}, 
-        graphics_manager, r_r.min_v, r_r.max_v, r_r.init_v, 
-        r.setter));
-    sliders_.add(std::make_unique<Slider>(
-        Vector2D<int>{WIDTH-4*w-4*margin, margin}, 
-        graphics_manager, f_r.min_v, f_r.max_v, f_r.init_v, 
-        f.setter));
+    // sliders_.add(std::make_unique<Slider>(
+    //     Vector2D<int>{WIDTH-1*w-1*margin, margin}, 
+    //     graphics_manager, speed_u_r.min_v, speed_u_r.max_v, speed_u_r.init_v, 
+    //     [this, &os_u, &at_u](double val)
+    //     { at_u.set_val(val);}));
+    // sliders_.add(std::make_unique<Slider>(
+    //     Vector2D<int>{WIDTH-2*w-2*margin, margin}, 
+    //     graphics_manager, zeta_r.min_v, zeta_r.max_v, zeta_r.init_v, 
+    //     zeta.setter));
+    // sliders_.add(std::make_unique<Slider>(
+    //     Vector2D<int>{WIDTH-3*w-3*margin, margin}, 
+    //     graphics_manager, r_r.min_v, r_r.max_v, r_r.init_v, 
+    //     r.setter));
+    // sliders_.add(std::make_unique<Slider>(
+    //     Vector2D<int>{WIDTH-4*w-4*margin, margin}, 
+    //     graphics_manager, f_r.min_v, f_r.max_v, f_r.init_v, 
+    //     f.setter));
 }
 
 void GameMode::import_data()
@@ -104,7 +95,6 @@ void GameMode::update()
 
     buttons_.update();
     sliders_.update();
-    at_at_.update();
 }
 
 void GameMode::render()
@@ -115,7 +105,6 @@ void GameMode::render()
 
     buttons_.render();
     sliders_.render();
-    at_at_.render();
 
 
     

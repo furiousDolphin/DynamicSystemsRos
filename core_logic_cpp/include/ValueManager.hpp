@@ -10,6 +10,7 @@ using DoubleGetter = std::function<double(void)>;
 class ValueManager
 {
     public:
+        ValueManager(double init_val);
         ValueManager();
 
         double get_val() const;

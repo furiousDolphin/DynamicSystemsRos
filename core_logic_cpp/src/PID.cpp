@@ -6,7 +6,7 @@ PID::PID(double out_min, double out_max) :
     params_{0.0, 0.0, 0.0, 0.0, 0.0, true},
     P_{0.0}, I_{0.0}, D_{0.0},
     A_{0.0}, B_{0.0},
-    prev_e_{0.0}, D_prev_{0.0},
+    prev_e_{0.0}, prev_D_{0.0},
     out_min_{out_min}, out_max_{out_max}
 {
 
@@ -51,7 +51,7 @@ double PID::do_step(double cur_e)
 
     double final_output = P_ + I_ + D_;
 
-    return std::clamp(final_output, out_min_, out_max_)
+    return std::clamp(final_output, out_min_, out_max_);
 }
 
 void PID::update_params(double Kf, double Tf, double Kp, double Ki, double Kd)

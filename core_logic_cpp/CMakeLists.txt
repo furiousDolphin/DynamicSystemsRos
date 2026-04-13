@@ -14,8 +14,13 @@ find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11_vendor REQUIRED)
 find_package(pybind11 REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SDL2_IMAGE REQUIRED SDL2_image)
+pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer)
+pkg_check_modules(SDL2_TTF REQUIRED SDL2_ttf)
 find_package(Eigen3 REQUIRED)
 find_package(Boost REQUIRED)
+find_package(nlohmann_json REQUIRED)
 
 
 pybind11_add_module(module_uno 
@@ -23,19 +28,36 @@ pybind11_add_module(module_uno
     src/System.cpp
     src/ChebFunc.cpp
     src/ValueManager.cpp
-    src/PID.cpp)
+    src/PID.cpp
+    src/App.cpp
+    src/GameMode.cpp
+    src/MainMenuMode.cpp
+    src/Button.cpp
+    src/Slider.cpp
+    src/EventManager.cpp
+    src/GraphicsManager.cpp
+    src/PersistentState.cpp
+    src/SDL_Management.cpp
+    src/Animation.cpp)
 
 target_include_directories(module_uno PUBLIC
     ${PROJECT_SOURCE_DIR}/include
     ${SDL2_INCLUDE_DIRS}
+    ${SDL2_IMAGE_INCLUDE_DIRS}
+    ${SDL2_MIXER_INCLUDE_DIRS}
+    ${SDL2_TTF_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
     ${Boost_INCLUDE_DIRS}
 )
 
 target_link_libraries(module_uno PUBLIC 
     ${SDL2_LIBRARIES}
+    ${SDL2_IMAGE_LIBRARIES}
+    ${SDL2_MIXER_LIBRARIES}
+    ${SDL2_TTF_LIBRARIES}
     ${Boost_LIBRARIES}
     Eigen3::Eigen 
+    nlohmann_json::nlohmann_json
 )
 
 install(TARGETS module_uno
