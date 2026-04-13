@@ -15,7 +15,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
-from system_interfaces.msg import SimpleFloat
+from system_interfaces.msg import SimpleFloat, PidParams, PidOut, SetpointProviderOut, SystemOut
 
 #-------------------------------------------------
 
