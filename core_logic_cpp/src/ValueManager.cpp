@@ -6,8 +6,8 @@
 ValueManager::ValueManager(double init_val) :
     val_{init_val},
     dirty_{false},
-    getter{[this](){return val_;}},
-    setter{[this](double new_val){dirty_ = (new_val == val_ ? false : true); val_=new_val;}}
+    getter{nullptr},
+    setter{nullptr}
 {
 
 }

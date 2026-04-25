@@ -43,6 +43,11 @@ struct SliderConfig
     Vector2D<int> start_pos;
 };
 
+struct SliderResults
+{
+    std::unordered_map<std::string, ValueManager> data;
+};
+
 class Sliders;
 
 class Slider
@@ -120,7 +125,8 @@ class Sliders
 
         Sliders(
             const EventManager& event_manager, 
-            const GraphicsManager& graphics_manager);
+            const GraphicsManager& graphics_manager,
+            SliderResults& slider_results);
 
         //void add(std::unique_ptr<Slider> slider_ptr);
         //void add(SliderConfig slider_config);
@@ -137,6 +143,7 @@ class Sliders
         {
             const EventManager& event_manager;
             const GraphicsManager& graphics_manager;
+            SliderResults& slider_results;
         } context_;
 
         class GrabbedState
@@ -158,7 +165,6 @@ class Sliders
 
         std::list<std::unique_ptr<Slider>> sliders_;
 
-        std::unordered_map<std::string, ValueManager> dict_;
 
         
 };

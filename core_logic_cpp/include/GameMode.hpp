@@ -29,6 +29,8 @@ class GameMode : public Mode
             GraphicsManager& graphics_manager, 
             PersistentState& persistent_state,
             const std::string& base_path,
+            std::vector<SliderConfig>& slider_configs, 
+            SliderResults& slider_results,
             float& dt );
 
         void run() override;

@@ -3,6 +3,7 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/eigen.h>
 #include <pybind11/stl.h>
+#include <pybind11/stl_bind.h>
 
 #include "System.hpp"
 #include "ValueManager.hpp"
@@ -12,6 +13,8 @@
 
 namespace py = pybind11;
 
+
+PYBIND11_MAKE_OPAQUE(std::unordered_map<std::string, ValueManager>);
 PYBIND11_MODULE(module_uno, m) 
 {
      m.doc() = "";
@@ -130,6 +133,13 @@ PYBIND11_MODULE(module_uno, m)
           .def_readwrite("y", &Vector2D<int>::y);
 
      py::class_<SliderConfig>(m, "SliderConfig")
+          .def(py::init<const std::string&, SliderType, double, double, double, Vector2D<int>>(),
+               py::arg("name"),
+               py::arg("type"),
+               py::arg("min_val"),
+               py::arg("max_val"),
+               py::arg("init_val"),
+               py::arg("start_pos"))
           .def_readonly("name", &SliderConfig::name)
           .def_readonly("type", &SliderConfig::type)
           .def_readonly("min_val", &SliderConfig::min_val)
@@ -137,9 +147,17 @@ PYBIND11_MODULE(module_uno, m)
           .def_readonly("init_val", &SliderConfig::init_val)
           .def_readonly("start_pos", &SliderConfig::start_pos);
 
+     
+     py::bind_map<std::unordered_map<std::string, ValueManager>>(m, "MapStringValueManager");
+     py::class_<SliderResults>(m, "SliderResults")
+               .def(py::init<>())
+               .def_readwrite("data", &SliderResults::data);
+
      py::class_<App>(m, "App")
-          .def(py::init<const std::string&>(), 
-               py::arg("base_path"))
+          .def(py::init<const std::string&, std::vector<SliderConfig>&, SliderResults&>(), 
+               py::arg("base_path"),
+               py::arg("slider_configs"),
+               py::arg("slider_results"))
           .def("run",
                &App::run,
                "")

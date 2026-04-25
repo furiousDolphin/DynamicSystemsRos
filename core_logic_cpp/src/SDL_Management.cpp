@@ -58,7 +58,6 @@ bool Init( SDL_Window*& window, SDL_Renderer*& renderer )
             }
         }
     }
-
    return success; 
 }
 

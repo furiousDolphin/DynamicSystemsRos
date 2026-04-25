@@ -18,12 +18,18 @@
 #include "Mode.hpp"
 #include "PersistentState.hpp"
 #include "ValueManager.hpp"
+#include "Slider.hpp"
+
 
 
 class App
 {
     public:
-        App(const std::string& base_path);
+        App(
+            const std::string& base_path, 
+            std::vector<SliderConfig>& slider_configs, 
+            SliderResults& slider_results
+        );
         ~App();
         
         void run();

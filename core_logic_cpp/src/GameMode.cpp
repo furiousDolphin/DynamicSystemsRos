@@ -14,16 +14,20 @@ GameMode::GameMode(
     GraphicsManager& graphics_manager, 
     PersistentState& persistent_state,
     const std::string& base_path, 
+    std::vector<SliderConfig>& slider_configs, 
+    SliderResults& slider_results,
     float& dt 
 ) :
     context_{renderer, event_manager, graphics_manager, persistent_state, dt},
     buttons_{event_manager, graphics_manager},
-    sliders_{event_manager, graphics_manager}
+    sliders_{event_manager, graphics_manager, slider_results}
 {
     this->create_buttons();
-    this->create_sliders();
+    //this->create_sliders();
 
+    sliders_.add(slider_configs);
     sliders_.init();
+    
 }
 
 void GameMode::create_buttons()
@@ -36,6 +40,8 @@ void GameMode::create_buttons()
 
 void GameMode::create_sliders()
 {
+
+
     // int w = 100;
     // int margin = 20;
 

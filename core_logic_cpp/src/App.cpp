@@ -6,7 +6,11 @@
 #include "GameMode.hpp"
 #include "MainMenuMode.hpp"
 
-App::App(const std::string& base_path) :
+App::App(
+    const std::string& base_path, 
+    std::vector<SliderConfig>& slider_configs, 
+    SliderResults& slider_results
+) :
     window_{nullptr},
     renderer_{nullptr},
     event_manager_{},
@@ -18,11 +22,10 @@ App::App(const std::string& base_path) :
 /*------------------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
     if (!this->init())
     { throw std::runtime_error("SDL nie ruszyl"); }
-
     try
     {
         graphics_manager_.init(renderer_, base_path);
-        modes_map_.emplace(ModeType::GAME, std::make_unique<GameMode>  ( renderer_, event_manager_, graphics_manager_, persistent_state_, base_path, delta_time_) );
+        modes_map_.emplace(ModeType::GAME, std::make_unique<GameMode>  ( renderer_, event_manager_, graphics_manager_, persistent_state_, base_path, slider_configs, slider_results, delta_time_) );
         modes_map_.emplace(ModeType::MAIN_MENU, std::make_unique<MainMenuMode>( renderer_, event_manager_, graphics_manager_, persistent_state_, delta_time_) );
     }
     catch(const std::exception& e)
@@ -37,6 +40,8 @@ bool App::init()
 
 App::~App()
 { Close( window_, renderer_ ); }
+
+
 
 bool App::run_once()
 {
