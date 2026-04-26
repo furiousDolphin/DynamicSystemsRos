@@ -16,7 +16,7 @@ import rclpy
 from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
-from system_interfaces.msg import SimpleFloat
+from system_interfaces.msg import SimpleFloat, PidParams, PidOut, SetpointProviderOut, SystemOut
 
 #-------------------------------------------------
 
@@ -32,6 +32,7 @@ class Subscriptons:
 class Signals:
     u: float = 0.0
     y: float = 0.0
+    Tp: float = 0.0
 
     def __iter__(self):
         return iter((self.u, self.y))
@@ -41,7 +42,6 @@ class SystemNode(Node):
         super().__init__("System_node")
 
         self.signals: Signals = Signals()
-        self.PID: Any = None
 
         self.pubs: Publishers = Publishers()
         self.subs: Subscriptons = Subscriptons()
@@ -49,11 +49,11 @@ class SystemNode(Node):
         #-----------------------------------------------------
 
         self.pubs.System_node_out =  self.create_publisher(
-            SimpleFloat, "/System_node_out", 10
+            SystemOut, "/System_node_out", 10
         )
 
         self.subs.PID_node_out = self.create_subscription(
-            SimpleFloat, "/PID_node_out", self.PID_callback, 10
+            PidOut, "/PID_node_out", self.PID_callback, 10
         )
 
         #-----------------------------------------------------
@@ -61,12 +61,14 @@ class SystemNode(Node):
         self.get_logger().info("inicjalizacja System_node")
 
 
-    def PID_callback(self, in_data: SimpleFloat)->None:
-        out_data: SimpleFloat = SimpleFloat()
+    def PID_callback(self, in_data: PidOut)->None:
+        out_data: SystemOut = SystemOut()
 
-        self.signals.u = in_data.data
+        self.signals.u = in_data.u
+        self.signals.Tp = in_data.tp
 
-        sys: Callable[[float], float] = lambda x: x
+
+        sys: Callable[[float], float] = lambda x: np.arcsin(x)
 
         self.signals.y = sys(self.signals.u)
         self.pubs.System_node_out.publish(out_data)
