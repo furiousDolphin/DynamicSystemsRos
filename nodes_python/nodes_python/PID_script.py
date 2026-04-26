@@ -3,7 +3,7 @@ import sys
 import os
 
 import numpy as np
-from typing import Callable, Optional, Any
+from typing import Callable, Optional, Any, List, Dict
 from PyQt6.QtWidgets import QApplication
 from dataclasses import dataclass
 
@@ -16,6 +16,8 @@ from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
 from system_interfaces.msg import SimpleFloat, PidParams, PidOut, SetpointProviderOut, SystemOut
+
+from pathlib import Path
 
 #-------------------------------------------------
 
@@ -38,6 +40,7 @@ class Signals:
 
     def __iter__(self):
         return iter((self.u, self.y, self.e, self.r))
+
 
 class PID_Node(Node):
     def __init__(self):
@@ -68,10 +71,10 @@ class PID_Node(Node):
         self.get_logger().info("inicjalizacja PID_node")
 
 
-
     def SetpointProvider_callback(self, in_data: SetpointProviderOut)->None:
         self.signals.r = in_data.r
         self.signals.Tp = in_data.tp
+
         self.get_logger().info(f"r: {self.signals.r:5.2f} y: {self.signals.y:5.2f} u: {self.signals.u:5.2f}")
 
     def System_callback(self, in_data: SystemOut)->None:
@@ -93,6 +96,7 @@ def main(args=None):
     node: PID_Node = PID_Node()
     rclpy.spin(node)
     rclpy.shutdown()
+    sys.exit(0)
 
 
 if __name__ == "__main__":
