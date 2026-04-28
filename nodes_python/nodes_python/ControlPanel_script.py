@@ -18,7 +18,13 @@ from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
 from system_interfaces.msg import SimpleFloat, PidParams, PidOut, SetpointProviderOut, SystemOut
+from system_interfaces.srv import SystemParams
+
+
 from pathlib import Path
+from ament_index_python.packages import get_package_share_directory
+
+from functools import partial
 
 
 
@@ -34,6 +40,10 @@ class Subscriptions:
 class Topics:
     SetpointProvider_node_out = SetpointProviderOut()
     System_node_out = SystemOut()
+
+@dataclass
+class Clients:
+    system_params: Any = None
 
 @dataclass
 class Signals:
@@ -70,16 +80,22 @@ class ControlPanelNode(Node):
     def __init__(self):
         super().__init__("ControlPanel_node")
         self.get_logger().info("inicjalizacja ControlPanel_node")
-
-        base_path = Path(__file__).resolve()
-        root_path = base_path.parent.parent.parent
-        graphics_base_path = root_path / "core_logic_cpp"
-        str_graphics_base_path: str = str(graphics_base_path) + "/"
         
+        try:
+            share_dir = get_package_share_directory("core_logic_cpp")
+            graphics_base_path = Path(share_dir)
+            str_graphics_base_path: str = str(graphics_base_path) + "/"
+            self.get_logger().info(f"scezka do grafik: {str_graphics_base_path}")
+        except Exception as e:
+            self.get_logger().error(f"nie znaleziono pakietu core_logic_cpp: {e}")
+
         self.__signals = Signals()
         self.__publishers = Publishers()
         self.__subscriptions = Subscriptions()
         self.__topics = Topics()
+        self.__clients = Clients()
+        self.__clients.system_params = self.create_client(SystemParams, "/ControlPanel_system_params")
+        
 
 
 
@@ -88,20 +104,30 @@ class ControlPanelNode(Node):
         self.__ui_timer: rclpy.timer.Timer = self.create_timer(self.__ui_timer_dt, self.__ui_timer_callback)
         #-----------------------------------------------------------------------------------------
 
+
         #-----------------------------------------------------------------------------------------
         self.__slider_apps: List[AppWrapper] = []
         #-----------------------------------------------------------------------------------------
+        # config: List[m.SliderConfig] = [
+        #     m.SliderConfig("r", m.SliderType.VERTICAL_SIMPLE, 0, 5, 2, m.Vector2D(200, 200))
+        # ]
+        # self.__slider_apps.append(AppWrapper(str_graphics_base_path, config))
+        #-----------------------------------------------------------------------------------------
         config: List[m.SliderConfig] = [
-            m.SliderConfig("r", m.SliderType.VERTICAL_SIMPLE, 0, 5, 2, m.Vector2D(200, 200))
+            m.SliderConfig("f", m.SliderType.VERTICAL_SIMPLE, 0, 5, 2, m.Vector2D(100, 200)),
+            m.SliderConfig("r", m.SliderType.VERTICAL_SIMPLE, 0, 5, 2, m.Vector2D(300, 200)),
+            m.SliderConfig("zeta", m.SliderType.VERTICAL_SIMPLE, 0, 5, 2, m.Vector2D(500, 200))
         ]
         self.__slider_apps.append(AppWrapper(str_graphics_base_path, config))
         #-----------------------------------------------------------------------------------------
+
 
         #-----------------------------------------------------------------------------------------
         self.__oscilloscopes: List[OscilloscopeWrapper] = []
         #-----------------------------------------------------------------------------------------
         config: List[Dict[str, Any]] = [
-            {"name": "r", "pen": "g", "getter": lambda: self.__signals.r, "buffer_size": 1000}
+            {"name": "r", "pen": "g", "getter": lambda: self.__signals.r, "buffer_size": 1000},
+            {"name": "y", "pen": "b", "getter": lambda: self.__signals.y, "buffer_size": 1000}
         ]
         self.__oscilloscopes.append(OscilloscopeWrapper(config))
         #-----------------------------------------------------------------------------------------
@@ -119,16 +145,62 @@ class ControlPanelNode(Node):
         for app in self.__slider_apps:
             running: bool = app.run_once()
             data: m.SliderResults = app.get_results().data
-            if "r" in data:
+
+            #---------------------------------------------------------
+            if "f" in data and "r" in data and "zeta" in data:
+                f_vm: m.ValueManager = data["f"]
+                r_vm: m.ValueManager = data["r"]
+                zeta_vm: m.ValueManager = data["zeta"]
+       
+                if f_vm.check_and_reset_dirty() or r_vm.check_and_reset_dirty() or zeta_vm.check_and_reset_dirty():
+                    self.get_logger().info(f"f={f_vm.get_val():.2f}, r={r_vm.get_val():.2f}, zeta={zeta_vm.get_val():.2f}")
+
+                    if self.__clients.system_params.service_is_ready():
+                        request: Any = SystemParams.Request()
+                        request.f = f_vm.get_val()
+                        request.r = r_vm.get_val()
+                        request.zeta = zeta_vm.get_val()
+
+                        future: Any = self.__clients.system_params.call_async(request)
+                        future.add_done_callback(partial(self.SystemParams_service_callback))
+            #---------------------------------------------------------
+
+            #---------------------------------------------------------
+            elif "r" in data:
+                #---------------------------------------------------------------
                 self.__signals.r = data["r"].get_val()
+
                 self.__topics.SetpointProvider_node_out.r = data["r"].get_val()
-                self.__topics.SetpointProvider_node_out.tp = 0.1
+                self.__topics.SetpointProvider_node_out.tp = 0.02
+
                 self.__publishers.SetpointProvider_node_out.publish(self.__topics.SetpointProvider_node_out)
+                #---------------------------------------------------------------
+            #---------------------------------------------------------
+
+        #---------------------------------------------------------
         for oscilloscope in self.__oscilloscopes:
             oscilloscope.update()
+        #---------------------------------------------------------
+
+        #---------------------------------------------------------
+        data_out: SetpointProviderOut = self.__topics.SetpointProvider_node_out
+        data_out.r = self.__signals.r
+        data_out.tp = 0.02
+        self.__publishers.SetpointProvider_node_out.publish(data_out)
+        #---------------------------------------------------------
+
+        
+
+    def SystemParams_service_callback(self, future: Any):
+        try:
+            response: Any = future.result()
+        except Exception as e:
+            self.get_logger().error(f"error w SystemParams_service_callback -> {e}")
+
 
     def System_callback(self, in_data: SystemOut)->None:
         self.__signals.y = in_data.y 
+
 
 def main(args: Any = None):
     rclpy.init(args=args)

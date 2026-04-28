@@ -17,6 +17,7 @@ from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
 from system_interfaces.msg import SimpleFloat, PidParams, PidOut, SetpointProviderOut, SystemOut
+from system_interfaces.srv import SystemParams
 
 #-------------------------------------------------
 
@@ -27,6 +28,8 @@ class Publishers:
 @dataclass
 class Subscriptons:
     PID_node_out: Optional[Subscription] = None
+    ControlPanel_sys_params: Optional[Subscription] = None
+    
 
 @dataclass
 class Signals:
@@ -46,6 +49,18 @@ class SystemNode(Node):
         self.pubs: Publishers = Publishers()
         self.subs: Subscriptons = Subscriptons()
 
+        self.__system = m.SecondOrderSystem()  
+        (zeta_vm, r_vm, f_vm) = self.__system.get_params()
+        zeta_vm.set_val(2.0)
+        r_vm.set_val(2.0)
+        f_vm.set_val(2.0)
+
+        self.system_params_srv = self.create_service(
+            SystemParams,
+            "/ControlPanel_system_params",
+            self.ControlPanel_system_params
+        )
+
         #-----------------------------------------------------
 
         self.pubs.System_node_out =  self.create_publisher(
@@ -60,6 +75,24 @@ class SystemNode(Node):
 
         self.get_logger().info("inicjalizacja System_node")
 
+        initial_msg = SystemOut()
+        initial_msg.y = 0.0
+        initial_msg.tp = 0.02 
+        self.pubs.System_node_out.publish(initial_msg)
+        self.get_logger().info("Wysłano stan początkowy y=0. Pętla gotowa.")
+
+
+    def ControlPanel_system_params(self, request: Any, response: Any):
+        #self.get_logger().info(f"odpala sie ControlPanel_system_params")
+        (zeta_vm, r_vm, f_vm) = self.__system.get_params()
+        zeta_vm.set_val(request.zeta)
+        r_vm.set_val(request.r)
+        f_vm.set_val(request.f)
+        self.get_logger().info(f"f={f_vm.get_val():.2f}, r={r_vm.get_val():.2f}, zeta={zeta_vm.get_val():.2f}")
+
+        #jakbym mial cos przewidzane pod ---, to teraz moglbym to wpisac robiac response.atr1=val1  response.atr2=val2
+
+        return response
 
     def PID_callback(self, in_data: PidOut)->None:
         out_data: SystemOut = SystemOut()
@@ -68,9 +101,11 @@ class SystemNode(Node):
         self.signals.Tp = in_data.tp
 
 
-        sys: Callable[[float], float] = lambda x: np.arcsin(x)
+        (cur_t, cur_y) = self.__system.do_RK4_step(self.signals.Tp)
+        self.get_logger().info(f"cur_y type = {type(cur_y)}, cur_y val = {cur_y}")
 
-        self.signals.y = sys(self.signals.u)
+        out_data.tp = in_data.tp
+        out_data.y = cur_y
         self.pubs.System_node_out.publish(out_data)
 
         self.get_logger().info(f"u: {self.signals.u:5.2f} y: {self.signals.y:5.2f}")
@@ -81,56 +116,6 @@ def main(args=None):
     rclpy.spin(node)
     rclpy.shutdown()
 
-
-
-
-# app: QApplication = QApplication(sys.argv)
-# square_wave: Callable[[float], float] = lambda t: 1.0 if np.sin(t) > 0 else 0.0 
-# u: m.ValueManager = m.ValueManager()
-# y: m.ValueManager = m.ValueManager()
-# scope: Oscilloscope = Oscilloscope(y.getter) 
-# scope.show()
-
-# def main(args=None):
-#     system: m.SecondOrderSystem = m.SecondOrderSystem()  
-#     (zeta, r, f) = system.get_params()
-#     zeta.set_val(0.3)
-#     r.set_val(0.1)
-#     f.set_val(1.0)
-
-#     #u.set_val(square_wave(0.0))
-#     #system.set_forcing_func(u.getter)
-
-
-#     n: int = 1000
-#     dt:float = 20.0/n
-#     t: float = 0.0
-
-#     n: int = 500
-#     (w_dense, mag_dense, phase_dense) = system.bode_data(-2, 2, n)
-#     (w_dense, Re_dense, Im_dense) = system.nyquist_data(-2, 2, n)
-#     (step_t_dense, step_y_dense) = system.step_response(10, n)
-#     (impulse_t_dense, impulse_y_dense) = system.impulse_response(10, n)
-
-#     subplot1: Subplot = Subplot()
-#     subplot1.add(w_dense, mag_dense, x_scale="log", y_scale="linear")
-
-#     subplot2: Subplot = Subplot()
-#     subplot2.add(w_dense, phase_dense, x_scale="log", y_scale="linear")
-
-#     subplot3: Subplot = Subplot(equal_aspect=True)
-#     subplot3.add(Re_dense, Im_dense, x_scale="linear", y_scale="linear")
-
-#     subplot4: Subplot = Subplot()
-#     subplot4.add(step_t_dense, step_y_dense, x_scale="linear", y_scale="linear")
-#     subplot4.add(impulse_t_dense, impulse_y_dense, x_scale="linear", y_scale="linear")
-
-#     subplots: SubplotManager = SubplotManager((960, 540))
-#     subplots.add(subplot1)
-#     subplots.add(subplot2)
-#     subplots.add(subplot3)
-#     subplots.add(subplot4)
-#     subplots.show()
 
 if __name__ == "__main__":
     main()

@@ -69,6 +69,9 @@ install(DIRECTORY scripts
   FILES_MATCHING PATTERN "*.py"
 )
 
+install(DIRECTORY data 
+  DESTINATION share/${PROJECT_NAME})
+
 #jakbym chcial zrobic apke na boku
 # add_executable(DynamicSystemsApp main.cpp)
 

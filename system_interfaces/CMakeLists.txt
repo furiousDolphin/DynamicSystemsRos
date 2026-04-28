@@ -19,7 +19,11 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/PidOut.msg"
   "msg/SetpointProviderOut.msg"
   "msg/SystemOut.msg"
+  "msg/SystemParams.msg"
+  "srv/SystemParams.srv"
 )
+
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

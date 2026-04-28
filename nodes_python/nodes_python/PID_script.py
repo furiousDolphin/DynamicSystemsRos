@@ -75,7 +75,8 @@ class PID_Node(Node):
         self.signals.r = in_data.r
         self.signals.Tp = in_data.tp
 
-        self.get_logger().info(f"r: {self.signals.r:5.2f} y: {self.signals.y:5.2f} u: {self.signals.u:5.2f}")
+        self.get_logger().info(f"r: {self.signals.r:.2f} y: {self.signals.y:.2f} u: {self.signals.u:.2f}")
+        
 
     def System_callback(self, in_data: SystemOut)->None:
         out_data: PidOut = PidOut()
@@ -87,7 +88,7 @@ class PID_Node(Node):
 
         self.signals.u = pid(self.signals.e)
 
-        out_data.u = self.signals.u  #trzeba podmienic na u jak wprowadze prawdziwy regulator
+        out_data.u = self.signals.r  #trzeba podmienic na u jak wprowadze prawdziwy regulator
         out_data.tp = self.signals.Tp
         self.pubs.PID_node_out.publish(out_data)
 
